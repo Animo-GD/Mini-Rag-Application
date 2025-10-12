@@ -13,4 +13,16 @@ python -m venv mini-rag
 ```bash
 .\mini-rag\Scripts\activate.bat
 ```
-
+- Install requriements.
+```bash
+pip install -r requirement.txt
+```
+#### Setup environment variables.
+```bash
+cp .env.example .env
+```
+Set your environment variables in the `.env` file. like `OPENROUTER_API_KEY` value.
+## Run FastAPI server
+```bash
+uvicorn main:app --reload --host localhost --port 5000
+```
