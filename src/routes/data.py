@@ -1,8 +1,9 @@
 from fastapi import APIRouter,Depends,UploadFile,status
 from fastapi.responses import JSONResponse
 from utilis.config import get_settings,Setting
-from controllers import DataController,ProjectController
+from controllers import DataController,ProjectController,ProcessController
 from models import ResponseSignal
+from routes.schemes.data import ProccessRequest
 import aiofiles
 import logging
 
@@ -27,7 +28,7 @@ async def upload_data(project_id:str,file:UploadFile,app_settings:Setting = Depe
                 }
               )
     project_dir_path = ProjectController().get_project_path(project_id=project_id)
-    file_path = data_ctrl.generate_unique_filename(
+    file_path,file_id = data_ctrl.generate_unique_filepath(
         orig_file_name=file.filename,
         project_id=project_id
     )
@@ -46,6 +47,28 @@ async def upload_data(project_id:str,file:UploadFile,app_settings:Setting = Depe
     
     return JSONResponse(
             content={
-                "msg":ResponseSignal.FILE_UPLOADED_SUCCESS.value
+                "msg":ResponseSignal.FILE_UPLOADED_SUCCESS.value,
+                "file_id":file_id
                 }
               )
+
+@data_router.post("/process/{project_id}")
+async def process_endpoint(project_id:str,process_request:ProccessRequest):
+    file_id = process_request.file_id
+    chunk_size = process_request.chunk_size
+    overlap_size = process_request.overlap_size
+    process_controller = ProcessController(project_id=project_id)
+    file_content = process_controller.get_file_content(file_id=file_id)
+
+    file_chunks = process_controller.process_file_content(file_content=file_content,file_id=file_id
+                                                           ,chunk_size=chunk_size,overlap_size=overlap_size)
+    
+    if file_chunks is None or len(file_chunks) == 0:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={
+                "signal":ResponseSignal.PROCESSING_FAILED
+            }
+        )
+    
+    return file_chunks
