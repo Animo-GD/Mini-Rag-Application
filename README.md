@@ -7,22 +7,32 @@ Python >= 3.8
 - Download Python from [Here](https://www.python.org/).
 - Create virtual environment.
 ```bash
-python -m venv mini-rag
+$ python -m venv mini-rag
 ```
 - Activate the mini-rag env
 ```bash
-.\mini-rag\Scripts\activate.bat
+$ .\mini-rag\Scripts\activate.bat
 ```
 - Install requriements.
 ```bash
-pip install -r requirement.txt
+$ pip install -r requirement.txt
 ```
 #### Setup environment variables.
 ```bash
-cp .env.example .env
+$ cp .env.example .env
 ```
 Set your environment variables in the `.env` file. like `OPENROUTER_API_KEY` value.
 ## Run FastAPI server
 ```bash
-uvicorn main:app --reload --host localhost --port 5000
+$ uvicorn main:app --reload --host localhost --port 5000
+```
+## Run docker compose services
+```bash
+$ cd docker
+$ cp .env.example .env
+```
+
+- update `.env` with your credentials.
+```bash
+$ docker compose up -d
 ```
