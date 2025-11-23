@@ -5,7 +5,7 @@ from controllers import DataController,ProjectController,ProcessController
 from models import ResponseSignal
 from routes.schemes.data import ProccessRequest
 from models.ProjectModel import ProjectModel
-from models.db_schemes import DataChuck
+from models.db_schemes import DataChunk
 from models.ChunkModel import ChunkModel
 import aiofiles
 import logging
@@ -20,7 +20,7 @@ data_router = APIRouter(
 @data_router.post("/upload/{project_id}")
 async def upload_data(request:Request,project_id:str,file:UploadFile,app_settings:Setting = Depends(get_settings)):
 
-    project_model = ProjectModel(db_client=request.app.db_client)
+    project_model = await ProjectModel.create_instance(db_client=request.app.db_client)
     project = await project_model.get_project_or_create_one(project_id=project_id)
 
     data_ctrl=DataController()
@@ -66,8 +66,8 @@ async def process_endpoint(request:Request,project_id:str,process_request:Procce
     overlap_size = process_request.overlap_size
     do_reset = process_request.do_reset
     process_controller = ProcessController(project_id=project_id)
-    chunk_model = ChunkModel(db_client=request.app.db_client)
-    project_model = ProjectModel(db_client=request.app.db_client)
+    chunk_model =  await ChunkModel.create_instance(db_client=request.app.db_client)
+    project_model = await ProjectModel.create_instance(db_client=request.app.db_client)
     project = await project_model.get_project_or_create_one(project_id=project_id)
 
     
@@ -87,7 +87,7 @@ async def process_endpoint(request:Request,project_id:str,process_request:Procce
         )
     
     file_chunks_records = [
-        DataChuck(
+        DataChunk(
             chunk_text=chunk.page_content,
             chunk_metadata=chunk.metadata,
             chunk_order=i+1,
